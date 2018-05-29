@@ -64,8 +64,8 @@ int16_t H0_T0_out, H1_T0_out;
 int HTS221::GetTemperature(float* pfData)
 {
     int16_t T_out, temperature_t;
-    uint8_t tempReg[2] = {0,0};
-    uint8_t tmp = 0x00;
+    char tempReg[2] = {0,0};
+    char tmp = 0x00;
     float T_degC;
     int ret=-1;//TODO:Define Error types?
 
@@ -96,7 +96,7 @@ int HTS221::GetTemperature(float* pfData)
 
     }
 
-    Register_Read(HTS221_TEMP_OUT_L_ADDR + 0x80 - 2, &tempReg[0], 2);
+    Register_Read(HTS221_TEMP_OUT_L_ADDR + 0x80, &tempReg[0], 2);
 
     T_out = ((((int16_t)tempReg[1]) << 8)+(int16_t)tempReg[0]);
 
@@ -118,8 +118,8 @@ int HTS221::GetTemperature(float* pfData)
 int HTS221::GetHumidity(float* pfData)
 {
     int16_t H_T_out, humidity_t;
-    uint8_t tempReg[2] = {0,0};
-    uint8_t tmp = 0x00;
+    char tempReg[2] = {0,0};
+    char tmp = 0x00;
     float H_rh;
     int ret;
 
@@ -158,7 +158,7 @@ int HTS221::GetHumidity(float* pfData)
 
 
     //HUM_TEMP_IO_Read(&tempReg[0], HTS221_ADDRESS, HTS221_HUMIDITY_OUT_L_ADDR + 0x80, 2);
-    Register_Read(HTS221_HUMIDITY_OUT_L_ADDR + 0x80 - 2, &tempReg[0], 2);
+    Register_Read(HTS221_HUMIDITY_OUT_L_ADDR + 0x80, &tempReg[0], 2);
 
     H_T_out = ((((int16_t)tempReg[1]) << 8)+(int16_t)tempReg[0]);
 
@@ -179,7 +179,7 @@ int HTS221::GetHumidity(float* pfData)
  */
 uint8_t HTS221::ReadID(void)
 {
-    uint8_t tmp;
+    char tmp;
     int ret;
 
     /* Read WHO I AM register */
@@ -197,11 +197,10 @@ uint8_t HTS221::ReadID(void)
  */
 void HTS221::Init() {
 
-    uint8_t tmp = 0x00;
+    char tmp = 0x00;
     int ret;
 
-    Power_ON();
-
+    ret = Power_ON();
     HTS221_Calibration();
 
     //HUM_TEMP_IO_Read(&tmp, HTS221_ADDRESS, HTS221_CTRL_REG1_ADDR, 1);
@@ -231,7 +230,7 @@ void HTS221::Init() {
 
 int HTS221::Power_ON() {
 
-    uint8_t tmpReg;
+    char tmpReg;
 
     /* Read the register content */
     int ret;
@@ -258,10 +257,10 @@ int HTS221::HTS221_Calibration() {
     /* Temperature in degree for calibration ( "/8" to obtain float) */
     uint16_t T0_degC_x8_L, T0_degC_x8_H, T1_degC_x8_L, T1_degC_x8_H;
     uint8_t H0_rh_x2, H1_rh_x2;
-    uint8_t tempReg[16];
+    char tempReg[16];
 
     int ret;
-    ret = Register_Read(HTS221_H0_RH_X2_ADDR + 80, tmpReg, 16);
+    ret = Register_Read(HTS221_H0_RH_X2_ADDR + 0x80, tempReg, 16);
 
     T0_degC_x8_L = (uint16_t)tempReg[2];
     T0_degC_x8_H = (uint16_t) (tempReg[5] & 0x03);
@@ -290,12 +289,12 @@ int HTS221::HTS221_Calibration() {
     return ret;
 }
 
-int Register_Write(char addr, const uint8_t value) {
-    char data[2] =  {addr, value};
+int HTS221::Register_Write(char addr, const uint8_t value) {
+    char data[2] = {addr, value};
     return _i2c.write(HTS221_ADDRESS, data, 2);
 }
 
-int Register_Read(char addr, char *buf, uint8_t nb) {
+int HTS221::Register_Read(char addr, char *buf, uint8_t nb) {
     _i2c.write(HTS221_ADDRESS, &addr, 1, true);
     return _i2c.read(HTS221_ADDRESS, buf, nb);
 }
