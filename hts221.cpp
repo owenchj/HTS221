@@ -64,10 +64,9 @@ int16_t H0_T0_out, H1_T0_out;
 int HTS221::GetTemperature(float* pfData)
 {
     int16_t T_out, temperature_t;
-    char tempReg[2] = {0,0};
-    char tmp = 0x00;
     float T_degC;
     int ret=-1;//TODO:Define Error types?
+    tmp = 0x00;
 
     if(isInitialized()==0)
       {
@@ -118,10 +117,9 @@ int HTS221::GetTemperature(float* pfData)
 int HTS221::GetHumidity(float* pfData)
 {
     int16_t H_T_out, humidity_t;
-    char tempReg[2] = {0,0};
-    char tmp = 0x00;
     float H_rh;
     int ret;
+    tmp = 0x00;
 
     if(isInitialized()==0)
       {
@@ -179,7 +177,6 @@ int HTS221::GetHumidity(float* pfData)
  */
 uint8_t HTS221::ReadID(void)
 {
-    char tmp;
     int ret;
 
     /* Read WHO I AM register */
@@ -197,7 +194,6 @@ uint8_t HTS221::ReadID(void)
  */
 void HTS221::Init() {
 
-    char tmp = 0x00;
     int ret;
 
     ret = Power_ON();
@@ -230,18 +226,16 @@ void HTS221::Init() {
 
 int HTS221::Power_ON() {
 
-    char tmpReg;
-
     /* Read the register content */
     int ret;
-    ret = Register_Read(HTS221_CTRL_REG1_ADDR, &tmpReg, 1);
+    ret = Register_Read(HTS221_CTRL_REG1_ADDR, &tmp, 1);
     if(ret) return ret;
 
     /* Set the power down bit */
-    tmpReg |= HTS221_MODE_ACTIVE;
+    tmp |= HTS221_MODE_ACTIVE;
 
     /* Write register */
-    ret = Register_Write(HTS221_CTRL_REG1_ADDR, tmpReg);
+    ret = Register_Write(HTS221_CTRL_REG1_ADDR, tmp);
     if(ret) return ret;
     return ret;
 }
@@ -257,7 +251,6 @@ int HTS221::HTS221_Calibration() {
     /* Temperature in degree for calibration ( "/8" to obtain float) */
     uint16_t T0_degC_x8_L, T0_degC_x8_H, T1_degC_x8_L, T1_degC_x8_H;
     uint8_t H0_rh_x2, H1_rh_x2;
-    char tempReg[16];
 
     int ret;
     ret = Register_Read(HTS221_H0_RH_X2_ADDR + 0x80, tempReg, 16);
@@ -290,11 +283,13 @@ int HTS221::HTS221_Calibration() {
 }
 
 int HTS221::Register_Write(char addr, const uint8_t value) {
-    char data[2] = {addr, value};
+    data[0] = addr;
+    data[1] = value;
     return _i2c.write(HTS221_ADDRESS, data, 2);
 }
 
 int HTS221::Register_Read(char addr, char *buf, uint8_t nb) {
-    _i2c.write(HTS221_ADDRESS, &addr, 1, true);
+    tmp = addr;
+    _i2c.write(HTS221_ADDRESS, &tmp, 1, true);
     return _i2c.read(HTS221_ADDRESS, buf, nb);
 }

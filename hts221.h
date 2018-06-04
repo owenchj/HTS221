@@ -74,6 +74,9 @@ private:
 
     I2C _i2c;
     uint8_t HumTempInitialized;
+    char tempReg[16];
+    char tmp;
+    char data[2];
 };
 
 #endif // __MEMS_HTS221_H
